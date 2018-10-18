@@ -85,13 +85,16 @@ class Builder
      * @param Product $product
      * @param Store $store
      * @param ConfigurableAttribute[] $attributes
-     * @return NostoSku
+     * @return NostoSku|null
      * @throws \Exception
      */
     public function build(Product $product, Store $store, $attributes)
     {
-        $nostoSku = new NostoSku();
+        if (!$this->isAvailabeInStore($product, $store)) {
+            return null;
+        }
 
+        $nostoSku = new NostoSku();
         try {
             $nostoSku->setId($product->getId());
             $nostoSku->setName($product->getName());
@@ -147,13 +150,6 @@ class Builder
      */
     private function buildSkuAvailability(Product $product)
     {
-        $availability = ProductInterface::OUT_OF_STOCK;
-        if (!$product->isVisibleInSiteVisibility()) {
-            $availability = ProductInterface::INVISIBLE;
-        } elseif ($product->isAvailable()) {
-            $availability = ProductInterface::IN_STOCK;
-        }
-
-        return $availability;
+        return $product->isAvailable() ? ProductInterface::IN_STOCK : ProductInterface::OUT_OF_STOCK;
     }
 }
